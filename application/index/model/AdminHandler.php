@@ -14,9 +14,20 @@ class AdminHandler extends Model{
 	public $pageNow;
 	public $pageTotal;
 	public $dataTotal;
+	public $dbVerInfo;
 	
 	public function __construct($options){
 		$this->siteOptions = $options;
+	}
+
+	public function checkDbVersion(){
+		$versionInfo = json_decode(@file_get_contents(ROOT_PATH. "application/version.json"),true);
+		$dbVerNow = Option::getValue("database_version");
+		if(!isset($versionInfo["db_version"]) || $dbVerNow < (int)$versionInfo["db_version"]){
+			$this->dbVerInfo = array('now' => $dbVerNow, 'require' => $versionInfo["db_version"]);
+			return true;
+		}
+		return false;
 	}
 
 	public function getStatics(){
@@ -337,7 +348,7 @@ class AdminHandler extends Model{
 	}
 
 	public function listFile(){
-		$pageSize = empty(cookie('pageSize')) ? 10 : cookie('pageSize');
+		$pageSize = !cookie('?pageSize') ? 10 : cookie('pageSize');
 		$orderType = empty(cookie('orderMethodFile')) ? "id DESC" : cookie('orderMethodFile');
 		$this->pageData = Db::name("files")
 		->where(function ($query) {
@@ -392,7 +403,7 @@ class AdminHandler extends Model{
 	}
 
 	public function listUser(){
-		$pageSize = empty(cookie('pageSize')) ? 10 : cookie('pageSize');
+		$pageSize = !cookie('?pageSize') ? 10 : cookie('pageSize');
 		$orderType = empty(cookie('orderMethodUser')) ? "id DESC" : cookie('orderMethodUser');
 		$this->pageData = Db::name("users")
 		->where(function ($query) {
@@ -461,7 +472,7 @@ class AdminHandler extends Model{
 	}
 
 	public function listShare(){
-		$pageSize = empty(cookie('pageSize')) ? 10 : cookie('pageSize');
+		$pageSize = !cookie('?pageSize') ? 10 : cookie('pageSize');
 		$orderType = empty(cookie('orderMethodShare')) ? "id DESC" : cookie('orderMethodShare');
 		$this->pageData = Db::name("shares")
 		->where(function ($query) {
@@ -506,7 +517,7 @@ class AdminHandler extends Model{
 	}
 
 	public function listPolicy(){
-		$pageSize = empty(cookie('pageSize')) ? 10 : cookie('pageSize');
+		$pageSize =!cookie('?pageSize') ? 10 : cookie('pageSize');
 		$this->pageData = Db::name("policy")
 		->where(function ($query) {
 			if(!empty(cookie('policySearch'))){

@@ -25,25 +25,10 @@
                 }
                 return parseInt(size * 100) / 100 + filetype[i];
             }
-            Date.prototype.format = function(fmt) {
-                var o = {
-                    "M+": this.getMonth() + 1,
-                    "d+": this.getDate(),
-                    "h+": this.getHours(),
-                    "m+": this.getMinutes(),
-                    "s+": this.getSeconds(),
-                    "q+": Math.floor((this.getMonth() + 3) / 3),
-                    "S": this.getMilliseconds()
-                };
-                if (/(y+)/.test(fmt)) {
-                    fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-                }
-                for (var k in o) {
-                    if (new RegExp("(" + k + ")").test(fmt)) {
-                        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-                    }
-                }
-                return fmt;
+            function formateDate(dateString){
+                var bigDate = dateString.split(" ");
+                var smallDate = bigDate[0].split("-");
+                return smallDate[0]+"年"+smallDate[1]+"月"+smallDate[2]+"日 "+bigDate[1];
             }
 
             function audioPause() {
@@ -53,7 +38,7 @@
             $("#size").html(getSize(shareInfo.fileSize));
             $("#down_num").html(shareInfo.downloadNum);
             $("#view_num").html(shareInfo.ViewNum);
-            shareTime = new Date(shareInfo.shareDate).format("yyyy年MM月dd日 hh:mm");
+            shareTime = formateDate(shareInfo.shareDate);
             $("#share_time").html(shareTime);
             $("#download").click(function() {
                 $.post("/Share/getDownloadUrl", {
@@ -95,6 +80,10 @@
                 video: {
                     url: url
                 },
+                danmaku: {
+                       id: 'Cloudreve_'+shareInfo.shareId,
+                       api: 'https://api.prprpr.me/dplayer/'
+                }
             });
             dp.on("fullscreen", function(){
                 $(".modal-backdrop").hide();
@@ -148,9 +137,9 @@
                 $(".file-sign").html('<i class="fa fa-file-movie-o" aria-hidden="true"></i>')
                 $("#previewButton").click(function() {
                     if (shareInfo.allowPreview) {
-                        $(".previewContent").html('<div id="preview-target" style="width: 100%;object-fit: fill" class="preview"></div>');
-                        $('#previewModal').modal();
+                        $(".previewContent").html('<div id="preview-target" style="width: 100%;object-fit: fill;height:400px" class="preview"></div>');
                         loadDPlayer('/Share/Preview/' + shareInfo.shareId);
+                        $('#previewModal').modal();
                     } else {
                         toastr["error"]("请先登录")
                     }
